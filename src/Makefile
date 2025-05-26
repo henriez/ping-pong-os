@@ -6,6 +6,8 @@ TARGET = ppos
 all: $(SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
 
+
+
 clean:
 	rm -f $(TARGET)
 

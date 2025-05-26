@@ -214,7 +214,7 @@ void after_task_switch ( task_t *task ) {
     if (task && task->userTask == 1) {
         task->activationsCount++;
         task->lastProc = systime();
-        task->timeSlice = QUANTUM;
+        task->timeSlice = QUANTUM;     // Quantum completo para nova tarefa
     }
 
     PPOS_PREEMPT_ENABLE;
