@@ -45,12 +45,7 @@ task_t* scheduler() {
         taskIterator = readyQueue;
         do {
             if (taskIterator != selectedTask) {
-                if (taskIterator->priority_dynamic > MAX_PRIO) {
                     taskIterator->priority_dynamic += ALPHA; 
-                }
-                if (taskIterator->priority_dynamic < MAX_PRIO) {
-                    taskIterator->priority_dynamic = MAX_PRIO;
-                }
             }
             taskIterator = taskIterator->next;
         }
@@ -93,10 +88,9 @@ void timer_interrupt_handler(int signum) {
 
     if (!taskExec->userTask) {
         return;
-    }
-
+    }    
     taskExec->timeSlice--;
-
+    
     if (taskExec->timeSlice <= 0 && PPOS_IS_PREEMPT_ACTIVE) { 
         task_yield();
     }
@@ -200,6 +194,8 @@ void before_task_switch ( task_t *task ) {
 #endif
     PPOS_PREEMPT_DISABLE;
 
+    if (task == NULL) return;
+
     if (taskExec && taskExec->userTask == 1 && taskExec->lastProc > 0) {
         unsigned int elapsedTime = systime() - taskExec->lastProc;
         taskExec->processTime += elapsedTime;
@@ -210,6 +206,10 @@ void after_task_switch ( task_t *task ) {
 #ifdef DEBUG
     printf("\ntask_switch - AFTER - [%d -> %d]", taskExec->id, task->id);
 #endif
+    if (task == NULL) {
+        PPOS_PREEMPT_ENABLE;
+        return;
+    }
 
     if (task && task->userTask == 1) {
         task->activationsCount++;
@@ -221,6 +221,8 @@ void after_task_switch ( task_t *task ) {
     if (task && task->userTask == 1) {
         task->timeSlice = QUANTUM; 
     }
+    PPOS_PREEMPT_ENABLE;
+    
 }
 
 void before_task_yield () {
